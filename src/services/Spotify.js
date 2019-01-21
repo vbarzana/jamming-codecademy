@@ -1,9 +1,10 @@
-const clientId = '995a333951874e1ea83aa9cfabecb0db';
-const redirectUri = 'http://localhost:3000/callback';
+const clientId = 'YOUR_CLIENT_ID';										// @todo: replace with your client id
+const redirectUri = 'http://localhost:3000/callback'; // @todo: replace with your callback url
 const apiUrl = 'https://api.spotify.com/v1';
 const scope = 'playlist-modify-public';
 const defaultTypes = 'album,artist,playlist,track';
 let accessToken = null;
+let userId = null;
 
 /**
  * Obtains parameters from the hash of the URL
@@ -20,22 +21,111 @@ const getHashParams = () => {
 	return hashParams;
 };
 
+const clearCredentials = () => {
+	accessToken = null;
+	window.location.hash = '';
+	userId = null;
+	Spotify.login();
+};
+
 class Spotify {
 	static getTokenFromHash() {
+		if (accessToken) {
+			return accessToken;
+		}
+
 		let params = getHashParams();
-		let accessToken = params.access_token;
+		accessToken = params.access_token;
 		const expiresIn = parseInt(params.expires_in, 10) * 1000;
 
 		if (accessToken) {
-			setTimeout(() => {
-				accessToken = null;
-				window.location.hash = '';
-			}, expiresIn);
+			setTimeout(() => clearCredentials, expiresIn);
 		} else {
 			return Spotify.login();
 		}
 
 		return accessToken;
+	}
+
+	static async getUserId() {
+		if (userId) {
+			return userId;
+		}
+		return fetch(`${apiUrl}/me`, {
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${Spotify.getTokenFromHash()}`
+			}
+		}).then(response => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw new Error('Invalid response');
+		}).then(jsonResponse => {
+			userId = jsonResponse.id;
+			return userId;
+		});
+	}
+
+	/**
+	 * Creates a new playlist in Spotify, once the playlist is created it will add the user tracks, note, if a playlist
+	 * with the same name already exist in Spotify it will not alert the user, instead a playlist with the same name
+	 * will be created
+	 * @param {String} name The name of the playlist
+	 * @param {Track []} tracks The tracks array
+	 * @returns {Promise<void>}
+	 */
+	static async createPlaylist(name, tracks) {
+		if (!name) return;
+		let playlist;
+		try {
+			playlist = await Spotify.doCreatePlaylist(name);
+		} catch (error) {
+			console.log(error);
+		}
+
+		try {
+			await Spotify.addTracksToPlaylist(playlist, tracks);
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	static async doCreatePlaylist(name) {
+		let user_id = await Spotify.getUserId();
+		return fetch(`${apiUrl}/users/${user_id}/playlists`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${Spotify.getTokenFromHash()}`
+			},
+			body: JSON.stringify({
+				name: name
+			})
+		}).then(response => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw new Error('Invalid response');
+		});
+	}
+
+	static async addTracksToPlaylist(playlist, tracks) {
+		return fetch(`${apiUrl}/playlists/${playlist.id}/tracks`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${Spotify.getTokenFromHash()}`
+			},
+			body: JSON.stringify({
+				uris: (tracks || []).map(track => track.uri)
+			})
+		}).then(response => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw new Error('Invalid response');
+		});
 	}
 
 	static login() {
@@ -44,7 +134,7 @@ class Spotify {
 	}
 
 	static async search(query, types) {
-		let accessToken = Spotify.getTokenFromHash();
+		let accessToken = Spotify.getTokenFromHash('search', [query, types]);
 		query = encodeURIComponent(query);
 		if (!types) {
 			types = defaultTypes;
@@ -57,13 +147,17 @@ class Spotify {
 				Authorization: `Bearer ${accessToken}`
 			}
 		}).then(response => {
-			return response.json();
+			if (response.ok) {
+				return response.json();
+			}
+			clearCredentials();
+			throw new Error('Request failed!');
 		}).then(jsonResponse => {
 			let tracks = (jsonResponse && jsonResponse && jsonResponse.tracks.items) || [];
 			return tracks.map(track => {
 				return {
 					id: track.id,
-					href: track.href,
+					uri: track.uri,
 					album: track.album.name,
 					name: track.name,
 					artist: track.artists[0] && track.artists[0].name
@@ -71,6 +165,6 @@ class Spotify {
 			})
 		});
 	}
-};
+}
 
 export default Spotify;

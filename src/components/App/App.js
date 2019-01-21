@@ -15,6 +15,7 @@ class App extends Component {
 		this.onSearchChange = this.onSearchChange.bind(this);
 		this.addToPlaylist = this.addToPlaylist.bind(this);
 		this.removeFromPlaylist = this.removeFromPlaylist.bind(this);
+		this.onSaveToSpotify = this.onSaveToSpotify.bind(this);
 	}
 
 	async onSearchChange(searchString) {
@@ -65,16 +66,40 @@ class App extends Component {
 		}
 	}
 
+	async onSaveToSpotify(playlistName) {
+		try {
+			await Spotify.createPlaylist(playlistName, this.state.playListTracks);
+			// if no error, then clear the playlist
+			this.setState({
+				playListTracks: []
+			});
+			Playlist.clearPlaylist();
+			alert(`Playlist ${playlistName} successfully created!`);
+		} catch (error) {
+			console.log(error);
+			alert(error.message);
+		}
+	}
+
 	render() {
 		return (
 			<div className="App">
-				<SearchBar onSearchChange={this.onSearchChange}/>
+				<SearchBar
+					onSearchChange={this.onSearchChange}
+				/>
 				<div className="App-playlist">
 					<div className="SearchResults">
 						<h2>Results</h2>
-						<TrackList tracks={this.state.searchResults} onToggleTrackToPlaylist={this.addToPlaylist}/>
+						<TrackList
+							tracks={this.state.searchResults}
+							onToggleTrackToPlaylist={this.addToPlaylist}
+						/>
 					</div>
-					<Playlist tracks={this.state.playListTracks} onToggleTrackToPlaylist={this.removeFromPlaylist}/>
+					<Playlist
+						tracks={this.state.playListTracks}
+						onToggleTrackToPlaylist={this.removeFromPlaylist}
+						onSaveToSpotify={this.onSaveToSpotify}
+					/>
 				</div>
 			</div>
 		);

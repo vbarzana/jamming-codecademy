@@ -1,5 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+# Jamming final project for codecademy
+Owner: Victor Antonio Barzana Crespo<br>
+This app was generated with react-create-app script and therefore the below information was automatically added.
+
 ## Available Scripts
 
 In the project directory, you can run:
