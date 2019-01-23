@@ -14,7 +14,9 @@ class TrackList extends React.Component {
 								inPlaylist={track.inPlaylist}
 								album={track.album}
 								onToggleTrackToPlaylist={this.props.onToggleTrackToPlaylist}
+								onToggleTrackPlay={this.props.onToggleTrackPlay}
 								artist={track.artist}
+								playingNow={track.playingNow}
 								title={track.name}
 							/>
 						)

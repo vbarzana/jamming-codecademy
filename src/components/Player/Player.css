@@ -1,0 +1,18 @@
+.Player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+    max-height: 953px;
+    width: 50%;
+    padding: 16px;
+    background-color: rgba(1, 12, 63, 0.7);
+    margin: 0 0 28px 0;
+    box-shadow: 0 4px 2px 2px #000000;
+}
+
+@media only screen and (max-width: 1020px) {
+    .Player {
+        width: 90%;
+    }
+}

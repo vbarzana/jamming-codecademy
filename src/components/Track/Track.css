@@ -4,6 +4,14 @@
     border-bottom: 1px solid rgba(256, 256, 256, 0.8);
 }
 
+.Track.playing-now {
+    color: yellow;
+}
+
+.Track-play-button {
+    cursor: pointer;
+}
+
 .Track-action {
     cursor: pointer;
     padding: .5rem;
