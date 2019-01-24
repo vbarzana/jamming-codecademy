@@ -4,11 +4,13 @@ import SearchBar from "../SearchBar/SearchBar";
 import TrackList from "../TrackList/TrackList";
 import Playlist from "../Playlist/Playlist";
 import Spotify from "../../services/Spotify";
+import Player from "../Player/Player";
 
 class App extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			currentTrackId: null,
 			searchResults: [],
 			playListTracks: []
 		};
@@ -16,6 +18,7 @@ class App extends Component {
 		this.addToPlaylist = this.addToPlaylist.bind(this);
 		this.removeFromPlaylist = this.removeFromPlaylist.bind(this);
 		this.onSaveToSpotify = this.onSaveToSpotify.bind(this);
+		this.previewInPlayer = this.previewInPlayer.bind(this);
 	}
 
 	async onSearchChange(searchString) {
@@ -45,6 +48,26 @@ class App extends Component {
 				})
 			}
 		}
+	}
+
+	previewInPlayer(trackId) {
+		const checkTrack = track => {
+			if (track.playingNow) {
+				track.playingNow = false;
+			}
+			if (track.id === trackId) {
+				track.playingNow = true;
+			}
+			return track;
+		};
+		let results = this.state.searchResults.map(checkTrack);
+		let playlistTracks = this.state.playListTracks.map(checkTrack);
+
+		this.setState({
+			searchResults: results,
+			playListTracks: playlistTracks,
+			currentTrackId: trackId
+		});
 	}
 
 	removeFromPlaylist(trackId) {
@@ -87,18 +110,21 @@ class App extends Component {
 				<SearchBar
 					onSearchChange={this.onSearchChange}
 				/>
+				<Player currentTrackId={this.state.currentTrackId}/>
 				<div className="App-playlist">
 					<div className="SearchResults">
 						<h2>Results</h2>
 						<TrackList
 							tracks={this.state.searchResults}
 							onToggleTrackToPlaylist={this.addToPlaylist}
+							onToggleTrackPlay={this.previewInPlayer}
 						/>
 					</div>
 					<Playlist
 						tracks={this.state.playListTracks}
 						onToggleTrackToPlaylist={this.removeFromPlaylist}
 						onSaveToSpotify={this.onSaveToSpotify}
+						onToggleTrackPlay={this.previewInPlayer}
 					/>
 				</div>
 			</div>

@@ -28,7 +28,11 @@ class Playlist extends React.Component {
 		return (
 			<div className="Playlist">
 				<input defaultValue={defaultValue}/>
-				<TrackList tracks={this.props.tracks} onToggleTrackToPlaylist={this.props.onToggleTrackToPlaylist}/>
+				<TrackList
+					tracks={this.props.tracks}
+					onToggleTrackToPlaylist={this.props.onToggleTrackToPlaylist}
+					onToggleTrackPlay={this.props.onToggleTrackPlay}
+				/>
 				<a className="Playlist-save" onClick={this.handleSaveToSpotify}>SAVE TO SPOTIFY</a>
 			</div>
 		);
