@@ -9,7 +9,7 @@ html {
 }
 
 h1 {
-  padding: .77rem 0;
+  padding: 0.77rem 0;
   background-color: #010c3f;
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -36,6 +36,11 @@ h2 {
   font-family: 'Work Sans', sans-serif;
   font-weight: 500;
   color: #fff;
+}
+
+button {
+  font-weight: 500;
+  color: #fbfbfb;
 }
 
 .App-playlist {
