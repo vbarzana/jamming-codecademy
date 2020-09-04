@@ -33,7 +33,7 @@ class Playlist extends React.Component {
 					onToggleTrackToPlaylist={this.props.onToggleTrackToPlaylist}
 					onToggleTrackPlay={this.props.onToggleTrackPlay}
 				/>
-				<a className="Playlist-save" onClick={this.handleSaveToSpotify}>SAVE TO SPOTIFY</a>
+				<button className="Playlist-save" onClick={this.handleSaveToSpotify}>SAVE TO SPOTIFY</button>
 			</div>
 		);
 	}
